@@ -14,9 +14,11 @@ jobs:
       - name: Update ICU version
         run: |
           FILE=tools/packaging/packaging.psm1
+          # Get latest ICU release number (integer only)
           LATEST=$(curl -s https://api.github.com/repos/unicode-org/icu/releases/latest \
                    | grep -oP '"tag_name": "\Krelease-\d+')
-          sed -i.bak -E "s/^(\s*\$BuildICUVersion\s*=\s*)[0-9]+(\s*#.*)?$/\1$LATEST/" $FILE
+          # Replace the line including optional comment
+          sed -i.bak -E "s/^(\s*\$BuildICUVersion\s*=\s*)[0-9]+(\s*#.*)?$/\1$LATEST\2/" $FILE
           rm $FILE.bak
 
       - name: Commit and create PR
@@ -31,7 +33,7 @@ jobs:
             git push -u origin update-icu-version
             gh pr create --title "Update ICU version to $LATEST" \
                          --body "Automated monthly ICU update" \
-                         --head update-icu-version --base main
+                         --head update-icu-version --base master
           else
             echo "ICU version already up-to-date."
           fi
