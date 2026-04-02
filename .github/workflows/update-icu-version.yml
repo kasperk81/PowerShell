@@ -33,15 +33,16 @@ jobs:
             exit 0
           fi
 
+          BRANCH_NAME="update-icu-version-$(date +%Y%m%d-%H%M)"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout -b update-icu-version
+          git checkout -b "$BRANCH_NAME"
           git add "$FILE"
           git commit -m "Update ICU version to $LATEST"
-          git push -u origin update-icu-version
+          git push -u origin "$BRANCH_NAME"
 
           gh pr create \
             --title "Update ICU version to $LATEST" \
             --body "Automated monthly ICU update" \
-            --head update-icu-version \
+            --head "$BRANCH_NAME" \
             --base master
