@@ -25,8 +25,7 @@ jobs:
           LATEST=$(curl -s https://api.github.com/repos/unicode-org/icu/releases/latest \
             | grep -oP '"tag_name": "release-\K\d+')
 
-          sed -i.bak -E 's/\$BuildICUVersion[[:space:]]*=[[:space:]]*[0-9]+/$BuildICUVersion = '"$LATEST"'/' "$FILE"
-          rm -f "$FILE.bak"
+          sed -i -E 's/\$BuildICUVersion[[:space:]]*=[[:space:]]*[0-9]+/$BuildICUVersion = '"$LATEST"'/' "$FILE"
 
           if git diff --quiet -- "$FILE"; then
             echo "ICU version already up-to-date."
