@@ -2152,7 +2152,7 @@ function Get-PackageDependencies
         #   than the build version and we know that older versions just works.
         #
         $MinICUVersion = 60                    # runtime minimum supported
-        $BuildICUVersion = 76                  # current build version
+        $BuildICUVersion = release-78                  # current build version
         $MaxICUVersion = $BuildICUVersion + 30 # headroom
 
         if ($Distribution -eq 'deb') {
