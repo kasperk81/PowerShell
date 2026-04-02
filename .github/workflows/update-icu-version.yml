@@ -34,3 +34,4 @@ jobs:
                          --head update-icu-version --base main
           else
             echo "ICU version already up-to-date."
+          fi
