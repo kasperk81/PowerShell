@@ -33,7 +33,7 @@ jobs:
             exit 0
           fi
 
-          BRANCH_NAME="update-icu-version-$(date +%Y%m%d-%H%M)"
+          BRANCH_NAME="update-icu-version-$(date +%Y%m%d)"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -b "$BRANCH_NAME"
