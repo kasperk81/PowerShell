@@ -22,15 +22,20 @@ jobs:
       - name: Update ICU version in packaging.psm1
         run: |
           FILE=tools/packaging/packaging.psm1
-          sed -i "s/ICU_VERSION\s*=\s*[0-9]\+/ICU_VERSION = ${LATEST#release-}/" $FILE
+          LATEST=$(curl -s https://api.github.com/repos/unicode-org/icu/releases/latest \
+                   | grep -oP '"tag_name": "\Krelease-\d+\.\d+')
+          BUILD=${LATEST#release-}
+          MAX=$(( ${BUILD%%.*} + 30 ))  # integer part + 30 for MaxICUVersion
+          sed -i "s/^\(\$BuildICUVersion\s*=\s*\).*$/\1$BUILD/" $FILE
+          sed -i "s/^\(\$MaxICUVersion\s*=\s*\).*$/\1$MAX/" $FILE
           if ! git diff --quiet; then
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
             git checkout -b update-icu-version
             git add $FILE
-            git commit -m "Update ICU version to ${LATEST#release-}"
+            git commit -m "Update ICU version to $BUILD"
             git push -u origin update-icu-version
-            gh pr create --title "Update ICU version to ${LATEST#release-}" \
+            gh pr create --title "Update ICU version to $BUILD" \
                          --body "Automated monthly ICU update" \
                          --head update-icu-version --base main
           else
