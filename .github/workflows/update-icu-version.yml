@@ -16,7 +16,7 @@ jobs:
           FILE=tools/packaging/packaging.psm1
           LATEST=$(curl -s https://api.github.com/repos/unicode-org/icu/releases/latest \
                    | grep -oP '"tag_name": "\Krelease-\d+')
-          sed -i.bak -E "s/^(\s*\$BuildICUVersion\s*=\s*)[0-9]+/\1$LATEST/" $FILE
+          sed -i.bak -E "s/^(\s*\$BuildICUVersion\s*=\s*)[0-9]+(\s*#.*)?$/\1$LATEST/" $FILE
           rm $FILE.bak
 
       - name: Commit and create PR
