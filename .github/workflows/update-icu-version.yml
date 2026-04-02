@@ -23,7 +23,7 @@ jobs:
 
           FILE=tools/packaging/packaging.psm1
           LATEST=$(curl -s https://api.github.com/repos/unicode-org/icu/releases/latest \
-            | grep -oP '"tag_name": "\Krelease-\d+')
+            | grep -oP '"tag_name": "release-\K\d+')
 
           sed -i.bak -E 's/\$BuildICUVersion[[:space:]]*=[[:space:]]*[0-9]+/$BuildICUVersion = '"$LATEST"'/' "$FILE"
           rm -f "$FILE.bak"
