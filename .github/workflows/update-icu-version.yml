@@ -2,46 +2,35 @@ name: Update ICU Version Monthly
 
 on:
   schedule:
-    - cron: '0 0 1 * *'  # 1st of every month UTC
+    - cron: '0 0 1 * *'
   workflow_dispatch:
 
 jobs:
   update-icu:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: Get latest ICU version
-        id: icu
-        run: |
-          # Get the latest ICU release tag (e.g., release-78-1)
-          LATEST=$(curl -s https://api.github.com/repos/unicode-org/icu/releases/latest \
-                   | grep -oP '"tag_name": "\Krelease-\d+(-\d+)?')
-          BUILD=${LATEST#release-}                   # Remove 'release-' prefix
-          BUILD_NUM=${BUILD%%[-.]*}                 # Extract integer part (78)
-          MAX=$(( BUILD_NUM + 30 ))                 # MaxICUVersion = Build + 30
-          echo "BUILD_NUM=$BUILD_NUM" >> $GITHUB_ENV
-          echo "MAX_ICU=$MAX" >> $GITHUB_ENV
-
-      - name: Update ICU version in packaging.psm1
+      - name: Update ICU version
         run: |
           FILE=tools/packaging/packaging.psm1
-          sed -i "s/^\(\$BuildICUVersion\s*=\s*\).*$/\1$BUILD_NUM/" $FILE
-          sed -i "s/^\(\$MaxICUVersion\s*=\s*\).*$/\1$MAX_ICU/" $FILE
+          LATEST=$(curl -s https://api.github.com/repos/unicode-org/icu/releases/latest \
+                   | grep -oP '"tag_name": "\Krelease-\d+')
+          sed -i.bak -E "s/^(\s*\$BuildICUVersion\s*=\s*)[0-9]+/\1$LATEST/" $FILE
+          rm $FILE.bak
 
-      - name: Commit and create PR if changes
+      - name: Commit and create PR
         run: |
-          if ! git diff --quiet; then
+          FILE=tools/packaging/packaging.psm1
+          if ! git diff --quiet $FILE; then
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
             git checkout -b update-icu-version
             git add $FILE
-            git commit -m "Update ICU version to $BUILD_NUM"
+            git commit -m "Update ICU version to $LATEST"
             git push -u origin update-icu-version
-            gh pr create --title "Update ICU version to $BUILD_NUM" \
+            gh pr create --title "Update ICU version to $LATEST" \
                          --body "Automated monthly ICU update" \
                          --head update-icu-version --base main
           else
             echo "ICU version already up-to-date."
-          fi
